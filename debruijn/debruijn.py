@@ -158,7 +158,7 @@ def get_contigs(graph, starting_nodes, ending_nodes):
     return paths
 
 def save_contigs(contigs_list, output_file):
-    path_number = 1
+    path_number = 0
     with open(output_file, 'w')as filout:
         for contig in contigs_list:
             path_seq = contig[0]
