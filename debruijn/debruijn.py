@@ -149,13 +149,24 @@ def get_contigs(graph, starting_nodes, ending_nodes):
     for start_node in starting_nodes:
         for end_node in ending_nodes:
             if nx.has_path(graph, start_node, end_node):
-                simple_path = list(nx.all_simple_paths(graph, start_node, end_node))
-                path_size = len(simple_path[0])
-                paths.append((simple_path, path_size))
+                simple_path = list(nx.all_simple_paths(graph, start_node, end_node))[0]
+                path = simple_path[0]
+                for i in range(1, len(simple_path)):
+                    path = path + simple_path[i][-1]
+                path_size = len(path)
+                paths.append((path, path_size))
     return paths
 
 def save_contigs(contigs_list, output_file):
-    pass
+    path_number = 1
+    with open(output_file, 'w')as filout:
+        for contig in contigs_list:
+            path_seq = contig[0]
+            path_len = contig[1]
+            path_fasta = fill(path_seq)
+            filout.write(f">contig_{path_number} len={path_len}\n")
+            filout.write(path_fasta+"\n")
+            path_number += 1
 
 
 def fill(text, width=80):
@@ -205,6 +216,7 @@ def main():
     sortie = get_sink_nodes(graphtest)
     paths = get_contigs(graphtest, entry, sortie)
     print(paths)
+    save_contigs(paths, "paths_test.txt")
 
 
     # Fonctions de dessin du graphe
