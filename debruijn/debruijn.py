@@ -99,7 +99,6 @@ def build_graph(kmer_dict):
     for kmer, weight in kmer_dict.items():
         value1 = kmer[:-1]
         value2 = kmer[1:]
-        print(value1, value2, weight)
         graph.add_edge(value1, value2, weight = weight)
     return graph
 
@@ -131,13 +130,29 @@ def solve_out_tips(graph, ending_nodes):
     pass
 
 def get_starting_nodes(graph):
-    pass
+    entry_nodes = []
+    for node in graph.nodes:
+        if len(list(graph.predecessors(node))) == 0:
+            entry_nodes.append(node)
+    return entry_nodes
+
 
 def get_sink_nodes(graph):
-    pass
+    exit_nodes = []
+    for node in graph.nodes:
+        if len(list(graph.successors(node))) == 0:
+            exit_nodes.append(node)
+    return exit_nodes
 
 def get_contigs(graph, starting_nodes, ending_nodes):
-    pass
+    paths = []
+    for start_node in starting_nodes:
+        for end_node in ending_nodes:
+            if nx.has_path(graph, start_node, end_node):
+                simple_path = list(nx.all_simple_paths(graph, start_node, end_node))
+                path_size = len(simple_path[0])
+                paths.append((simple_path, path_size))
+    return paths
 
 def save_contigs(contigs_list, output_file):
     pass
@@ -185,8 +200,13 @@ def main():
     args = get_arguments()
 
     data = build_kmer_dict(args.fastq_file, args.kmer_size)
-    print(data)
-    build_graph(data)
+    graphtest = build_graph(data)
+    entry = get_starting_nodes(graphtest)
+    sortie = get_sink_nodes(graphtest)
+    paths = get_contigs(graphtest, entry, sortie)
+    print(paths)
+
+
     # Fonctions de dessin du graphe
     # A decommenter si vous souhaitez visualiser un petit 
     # graphe
