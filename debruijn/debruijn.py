@@ -17,7 +17,7 @@ import argparse
 import os
 import sys
 import networkx as nx
-import matplotlib
+import matplotlib as plt
 from operator import itemgetter
 import random
 random.seed(9001)
@@ -68,19 +68,40 @@ def get_arguments():
 
 
 def read_fastq(fastq_file):
-    pass
+    with open(fastq_file, 'r') as filin:
+        file =  filin.readlines()
+        for i in range(1, len(file), 4):
+            yield file[i].strip()
 
 
 def cut_kmer(read, kmer_size):
-    pass
+    for i in range(len(read) - (kmer_size - 1)):
+        yield read[i:i + kmer_size]
 
 
 def build_kmer_dict(fastq_file, kmer_size):
-    pass
+    k_mers = {}
+    seq_data = read_fastq(fastq_file)
+    for seq in seq_data:
+        kmers = cut_kmer(seq, kmer_size)
+        for kmer in kmers:
+            if kmer not in k_mers:
+                k_mers[kmer] = 1
+            else:
+                k_mers[kmer] += 1
+    return k_mers 
+
+
 
 
 def build_graph(kmer_dict):
-    pass
+    graph = nx.DiGraph()
+    for kmer, weight in kmer_dict.items():
+        value1 = kmer[:-1]
+        value2 = kmer[1:]
+        print(value1, value2, weight)
+        graph.add_edge(value1, value2, weight = weight)
+    return graph
 
 
 def remove_paths(graph, path_list, delete_entry_node, delete_sink_node):
@@ -163,6 +184,9 @@ def main():
     # Get arguments
     args = get_arguments()
 
+    data = build_kmer_dict(args.fastq_file, args.kmer_size)
+    print(data)
+    build_graph(data)
     # Fonctions de dessin du graphe
     # A decommenter si vous souhaitez visualiser un petit 
     # graphe
